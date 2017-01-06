@@ -1,6 +1,7 @@
 {.this: self.}
 
 import strfmt
+import strutils
 import tables
 
 
@@ -82,60 +83,37 @@ proc add(root: var Node; c: char; last: NodePtr): NodePtr =
                     break
 
 
-# DOT file generation.
-proc writeformat(o: var Writer; node: NodePtr; fmt: Format) =
-    write o, 'n'
-    writeformat o, cast[uint](node), fmt
-
-
-proc escape(c: char): string =
-    case c
-    of '\t':
-        "\\\t"
-    of '"':
-        "\\\""
-    of '\\':
-        "\\\\"
-    else:
-        var s = "."
-        s[0] = c
-        s
-
-
-proc label(self: Node): string =
-    result = "\""
-    for i in firstPos - length + 1 .. firstPos:
-        result &= escape s[i]
-    result &= '"'
-
-
-proc printMeta(self: var Node) =
-    var attrs = @[["label", self.label]]
-    if isClone:
-        attrs.add(["shape", "Mcircle"])
-    printlnfmt "    {:X} [{:a| |=}]", addr self, attrs
-
-
-proc echo(self: var Node) =
-    if not done:
-        done = true
-        for c, node in next:
-            printlnfmt "    {:X} -> {:X} [label=\"{}\"]", addr self, node, escape c
-            echo node[]
-
-
 var root: Node
 init root
 var node = addr root
 for c in s:
     node = root.add(c, node)
 
-echo "digraph {\n    node [shape=circle]"
-printMeta root
+
+# DOT file generation.
+proc id(self: var Node): uint =
+    cast[uint](addr self)
+
+
+proc emitMeta(self: var Node) =
+    let label = escape s[firstPos - length + 1 .. firstPos]
+    printfmt "{} [label={}{}]\n", self.id, label, if isClone: " shape=Mcircle" else: ""
+
+
+proc dump(self: var Node) =
+    for c, node in next:
+        printfmt "{} -> {} [label={}]\n", self.id, node[].id, escape($c)
+        if not node.done:
+            node.done = true
+            dump node[]
+
+
+stdout.write "digraph {\nnode [shape=circle]\n"
+emitMeta root
 for i in 0..lastNode:
-    printMeta nodes[i]
-echo root
-echo "    edge [style=dotted dir=back arrowtail=empty]"
+    emitMeta nodes[i]
+dump root
+stdout.write "edge [style=dotted dir=back arrowtail=empty]\n"
 for i in 0..lastNode:
-    printlnfmt "    {:X} -> {:X}", nodes[i].link, addr nodes[i]
-echo '}'
+    printfmt "{} -> {}\n", nodes[i].link[].id, nodes[i].id
+stdout.write "}\n"
