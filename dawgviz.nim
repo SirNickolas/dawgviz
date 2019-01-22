@@ -1,6 +1,4 @@
-{.this: self.}
-
-import strfmt
+import strformat
 import strutils
 import tables
 
@@ -19,19 +17,19 @@ type
 
 
 proc init(self: var Node) =
-    length = 0
-    firstPos = -1
-    isClone = false
-    done = false
-    next = initTable[char, NodePtr]()
-    link = nil
+    self.length = 0
+    self.firstPos = -1
+    self.isClone = false
+    self.done = false
+    self.next = initTable[char, NodePtr]()
+    self.link = nil
 
 
 proc init(self: var Node; length: int) =
     self.length = length
-    isClone = false
-    done = false
-    next = initTable[char, NodePtr]()
+    self.isClone = false
+    self.done = false
+    self.next = initTable[char, NodePtr]()
 
 
 proc init(self: var Node; node: Node) =
@@ -96,13 +94,15 @@ proc id(self: var Node): uint =
 
 
 proc emitMeta(self: var Node) =
-    let label = escape s[firstPos - length + 1 .. firstPos]
-    printfmt "{} [label={}{}]\n", self.id, label, if isClone: " shape=Mcircle" else: ""
+    let
+        label = escape s[self.firstPos - self.length + 1 .. self.firstPos]
+        shape = if self.isClone: " shape=Mcircle" else: ""
+    stdout.write &"{self.id} [label={label}{shape}]\n"
 
 
 proc dump(self: var Node) =
-    for c, node in next:
-        printfmt "{} -> {} [label={}]\n", self.id, node[].id, escape($c)
+    for c, node in self.next:
+        stdout.write &"{self.id} -> {node[].id} [label={escape $c}]\n"
         if not node.done:
             node.done = true
             dump node[]
@@ -115,5 +115,5 @@ for i in 0..lastNode:
 dump root
 stdout.write "edge [style=dotted dir=back arrowtail=empty]\n"
 for i in 0..lastNode:
-    printfmt "{} -> {}\n", nodes[i].link[].id, nodes[i].id
+    stdout.write &"{nodes[i].link[].id} -> {nodes[i].id}\n"
 stdout.write "}\n"
