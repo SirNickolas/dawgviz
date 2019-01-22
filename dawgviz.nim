@@ -36,13 +36,9 @@ proc init(self: var Node; node: Node) =
   self = node
 
 
-let
-  s = stdin.readLine()
-  n = len s
-
 var
   lastNode = -1
-  nodes = newSeq[Node](n shl 1)
+  nodes: seq[Node]
 
 
 proc newNode(arg: int | Node): NodePtr =
@@ -81,11 +77,7 @@ proc add(root: var Node; c: char; last: NodePtr): NodePtr =
           break
 
 
-var root: Node
-init root
-var node = addr root
-for c in s:
-  node = root.add(c, node)
+let s = stdin.readLine()
 
 
 # DOT file generation.
@@ -108,12 +100,25 @@ proc dump(self: var Node) =
       dump node[]
 
 
-stdout.write "digraph {\nnode [shape=circle]\n"
-emitMeta root
-for i in 0..lastNode:
-  emitMeta nodes[i]
-dump root
-stdout.write "edge [style=dotted dir=back arrowtail=empty]\n"
-for i in 0..lastNode:
-  stdout.write &"{nodes[i].link[].id} -> {nodes[i].id}\n"
-stdout.write "}\n"
+proc main =
+  let n = s.len
+  nodes.newSeq n shl 1
+
+  var root: Node
+  init root
+  var node = addr root
+  for c in s:
+    node = root.add(c, node)
+
+  stdout.write "digraph {\nnode [shape=circle]\n"
+  emitMeta root
+  for i in 0 .. lastNode:
+    emitMeta nodes[i]
+  dump root
+  stdout.write "edge [style=dotted dir=back arrowtail=empty]\n"
+  for i in 0 .. lastNode:
+    stdout.write &"{nodes[i].link[].id} -> {nodes[i].id}\n"
+  stdout.write "}\n"
+
+
+main()
