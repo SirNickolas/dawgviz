@@ -3,7 +3,11 @@ author      = "Nickolay Bukreyev"
 description = "Suffix Automaton Visualizer"
 license     = "GPL-3"
 
-requires "nim >= 0.19.0"
-
+srcDir  = "src"
+binDir  = "bin"
 bin     = @["dawgviz"]
-skipExt = @["nim"]
+
+requires(
+  "nim >= 1.0.0",
+  "cligen >= 1.5.0",
+)
