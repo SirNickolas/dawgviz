@@ -11,3 +11,4 @@ requires(
 srcDir  = "src"
 binDir  = "bin"
 bin     = @["dawgviz"]
+installDirs = @["share"]

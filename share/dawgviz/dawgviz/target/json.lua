@@ -5,7 +5,7 @@ local escape = string.escape_json
 
 prologue      = "{%s:%s,%s:[{"
 input_key     = "i"
-dawg_key      = "a"
+dawg_key      = "g"
 substring_key = "s"
 first_pos_key = "p"
 len_key       = "n"
