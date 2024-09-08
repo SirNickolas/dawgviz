@@ -98,7 +98,7 @@ proc pushDawg(lu: LuaState; dawg: Dawg) =
 proc dawgviz(files: seq[string]; target = ""; eval: seq[string] = @[]) =
   let lu = luaL_newState()
   lu.prepare if target.len != 0: target elif files.len == 0: "dot" else: "-", files, eval
-  let input = stdin.readLine()
+  let input = try: stdin.readLine except EofError: ""
   lu.pushLString input
   lu.pushDawg initDawg input
   lu.call 2, 0
