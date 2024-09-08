@@ -1,3 +1,4 @@
+from   std/json import nil
 from   std/os import nil
 from   std/strutils import nil
 import std/tables
@@ -11,9 +12,20 @@ const luaScriptDir {.strDefine.} = "../share/dawgviz"
 proc panic(lu: LuaState): cint {.cdecl.} =
   quit lu.`$` -1
 
+proc escapeJson(lu: LuaState): cint {.cdecl.} =
+  lu.pushNimString json.escapeJson lu.checkNimString 1
+  1
+
+proc luaopen_string2(lu: LuaState): cint {.cdecl.} =
+  lu.getGlobal "string"
+  lu.pushCClosure escapeJson
+  lu.setField -2, "escape_json"
+  1
+
 proc prepare(lu: LuaState; target: string) =
   discard lu.atPanic panic # Our tiny app can afford registering a global panic handler.
   lu.openLibs
+  lu.pop lu.luaOpen_string2
 
   lu.getGlobal "package"
   lu.getField -1, "path"

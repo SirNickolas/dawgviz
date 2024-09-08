@@ -17,6 +17,7 @@ proc tolstring*(lu: LuaState; idx: cint; len: ptr int): ptr UncheckedArray[char]
 proc pushvalue*(lu: LuaState; idx: cint)
 proc pushinteger*(lu: LuaState; n: int)
 proc pushboolean*(lu: LuaState; b: cint)
+proc pushcclosure*(lu: LuaState; fn: LuaCFunction; n: cint = 0)
 proc createtable*(lu: LuaState; narr, nrec: cint)
 proc rawset*(lu: LuaState; idx: cint)
 proc rawgeti*(lu: LuaState; idx, i: cint)
@@ -30,7 +31,11 @@ proc call*(lu: LuaState; nargs, nresults: cint)
 
 proc pushNimString*(lu: LuaState; s: openArray[char]) {.importc: "lua_pushlstring".}
 proc luaL_newstate*: LuaState {.importc.}
-proc openlibs*(lu: LuaState) {.importc: "luaL_openlibs".}
+
+{.push importc: "luaL_$1".}
+proc openlibs*(lu: LuaState)
+proc checklstring*(lu: LuaState; numArg: cint; len: ptr int): ptr UncheckedArray[char]
+{.pop.} # importc
 
 {.pop.} # cdecl, sideEffect, dynlib
 
@@ -45,6 +50,11 @@ func toString*(p: openArray[char]): string =
 proc `$`*(lu: LuaState; idx: cint): string =
   var n: int
   let p = lu.toLString(idx, addr n)
+  p.toOpenArray(0, n - 1).toString
+
+proc checkNimString*(lu: LuaState; numArg: cint): string =
+  var n: int
+  let p = lu.checkLString(numArg, addr n)
   p.toOpenArray(0, n - 1).toString
 
 proc pop*(lu: LuaState; n: cint) {.inline.} =

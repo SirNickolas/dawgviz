@@ -1,7 +1,7 @@
--- TODO: Do proper JSON escaping (`%q` is insufficient).
 local buffer = require "string.buffer"
 
 local ipairs = ipairs
+local escape = string.escape_json
 
 prologue      = "[{"
 substring_key = "s"
@@ -24,33 +24,34 @@ end
 
 function Node:emit_substring()
   if substring_key then
-    o:putf(",\n%q:%q", substring_key, input:sub(self.first_pos - self.len + 1, self.first_pos))
+    local s = input:sub(self.first_pos - self.len + 1, self.first_pos)
+    o:putf(",\n%s:%s", escape(substring_key), escape(s))
   else
-    o:putf(",\n%q:%d", len_key, self.len)
+    o:putf(",\n%s:%d", escape(len_key), self.len)
   end
 end
 
 function Node:emit_first_pos()
-  o:putf(",\n%q:%d", first_pos_key, self.first_pos - 1)
+  o:putf(",\n%s:%d", escape(first_pos_key), self.first_pos - 1)
 end
 
 function Node:emit_clone()
   if self.clone then
-    o:putf(",\n%q:true", clone_key)
+    o:putf(",\n%s:true", escape(clone_key))
   end
 end
 
 function Node:emit_link()
   if self.link then
-    o:putf(",\n%q:%s", link_key, self.link:get_id())
+    o:putf(",\n%s:%s", escape(link_key), self.link:get_id())
   end
 end
 
 function Node:emit_next()
-  o:putf(",\n%q:", next_key)
+  o:putf(",\n%s:", escape(next_key))
   local sep = 0x7B
   for c, target in pairs(self.next) do
-    o:putf("%c%q:%s", sep, c, target:get_id())
+    o:putf("%c%s:%s", sep, escape(c), target:get_id())
     sep = 0x2C
   end
   o:put(sep == 0x2C and "}" or "{}")
