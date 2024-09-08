@@ -63,7 +63,7 @@ proc add*(self: var Dawg; c: char) =
     q.link = clone
     newNode.link = clone
     while true:
-      node.next.withValue(c, value) do:
+      node.next.withValue c, value:
         if value[] != q:
           return
         value[] = clone

@@ -17,6 +17,7 @@ proc tolstring*(lu: LuaState; idx: cint; len: ptr int): ptr UncheckedArray[char]
 proc pushvalue*(lu: LuaState; idx: cint)
 proc pushinteger*(lu: LuaState; n: int)
 proc pushboolean*(lu: LuaState; b: cint)
+proc pushlstring*(lu: LuaState; s: openArray[char])
 proc pushcclosure*(lu: LuaState; fn: LuaCFunction; n: cint = 0)
 proc createtable*(lu: LuaState; narr, nrec: cint)
 proc rawset*(lu: LuaState; idx: cint)
@@ -29,11 +30,12 @@ proc concat*(lu: LuaState; n: cint)
 proc call*(lu: LuaState; nargs, nresults: cint)
 {.pop.} # importc
 
-proc pushNimString*(lu: LuaState; s: openArray[char]) {.importc: "lua_pushlstring".}
 proc luaL_newstate*: LuaState {.importc.}
 
 {.push importc: "luaL_$1".}
 proc openlibs*(lu: LuaState)
+proc loadfile*(lu: LuaState; filename: cstring): cint
+proc loadbuffer*(lu: LuaState; buffer: openArray[char]; name: cstring): cint
 proc checklstring*(lu: LuaState; numArg: cint; len: ptr int): ptr UncheckedArray[char]
 {.pop.} # importc
 
