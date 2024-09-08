@@ -23,6 +23,7 @@ function emit_with_attrs(subject, attrs)
 end
 
 prologue    = "digraph {"
+graph_attrs = { }
 node_attrs  = {shape = "circle"}
 clone_attrs = {shape = "Mcircle"}
 edge_attrs  = { }
@@ -31,6 +32,13 @@ epilogue    = "}"
 
 function emit_prologue()
   print(prologue)
+end
+
+function emit_graph_attrs()
+  local a = concat_attrs(graph_attrs)
+  if a ~= "" then
+    print(a)
+  end
 end
 
 function emit_common_node_attrs()
@@ -101,6 +109,7 @@ end
 
 emitters = {
   "emit_prologue",
+  "emit_graph_attrs",
   "emit_common_node_attrs",
   "emit_all_nodes",
   "emit_common_edge_attrs",
