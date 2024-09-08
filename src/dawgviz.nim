@@ -7,7 +7,12 @@ import ./dawgviz/private/lua
 when not declared stdin:
   import std/syncio
 
-const luaScriptDir {.strDefine.} = "../share/dawgviz"
+const
+  luaScriptDir {.strDefine.} = "../share/dawgviz"
+  targetModulePrefix = "dawgviz.target."
+  implicitTarget = "dot"
+  nodeMetatableName = "Node"
+  emitFuncName = "emit"
 
 proc panic(lu: LuaState): cint {.cdecl, discardable.} =
   quit lu.`$` -1
@@ -37,11 +42,11 @@ proc prepare(lu: LuaState; target: string; files, patches: openArray[string]) =
   lu.createTable 0, 1
   lu.pushValue -1
   lu.setField -1, "__index"
-  lu.setGlobal "Node"
+  lu.setGlobal nodeMetatableName
 
   if target != "-":
     lu.getGlobal "require"
-    lu.pushLString "dawgviz.target." & target
+    lu.pushLString targetModulePrefix & target
     lu.call 1, 0
   for f in files:
     if lu.loadFile(f.cstring) != 0:
@@ -52,19 +57,19 @@ proc prepare(lu: LuaState; target: string; files, patches: openArray[string]) =
       lu.panic
     lu.call 0, 0
 
-  lu.getGlobal "emit"
+  lu.getGlobal emitFuncName
   case lu.luaType -1 # Check it right after loading files.
     of 0:
-      var msg = "Global function `emit` is not found."
+      var msg = "Global function `" & emitFuncName & "` is not found."
       if files.len + patches.len != 0:
-        msg &= """ Did you forget to `require "dawgviz.target.dot"`?"""
+        msg &= " Did you forget to `require \"" & targetModulePrefix & implicitTarget & "\"`?"
       quit msg
-    of 1 .. 4: quit "Global `emit` is not a function."
+    of 1 .. 4: quit "Global `" & emitFuncName & "` is not a function."
     else: discard
 
 proc pushDawg(lu: LuaState; dawg: Dawg) =
   lu.createTable dawg.nodes.len.cint, 0
-  lu.getGlobal "Node"
+  lu.getGlobal nodeMetatableName
   for i, node in dawg.nodes:
     lu.createTable 0, 6
     lu.pushValue -2
@@ -72,7 +77,7 @@ proc pushDawg(lu: LuaState; dawg: Dawg) =
     lu.rawSetI -3, cint i + 1
   lu.pop 1 # Node
 
-  var s = "\0"
+  var s = ['\0']
   for i, node in dawg.nodes:
     lu.rawGetI -1, cint i + 1
     lu.pushInteger i
@@ -97,7 +102,7 @@ proc pushDawg(lu: LuaState; dawg: Dawg) =
 
 proc dawgviz(files: seq[string]; target = ""; eval: seq[string] = @[]) =
   let lu = luaL_newState()
-  lu.prepare if target.len != 0: target elif files.len == 0: "dot" else: "-", files, eval
+  lu.prepare if target.len != 0: target elif files.len == 0: implicitTarget else: "-", files, eval
   let input = try: stdin.readLine except EofError: ""
   lu.pushLString input
   lu.pushDawg initDawg input
