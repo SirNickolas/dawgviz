@@ -1,4 +1,10 @@
-const luaJitLib {.strDefine.} = "libluajit(|-5.1).so(|.2)"
+const luaJitLib {.strDefine.} =
+  when defined windows:
+    "luajit(|-5.1).dll"
+  elif defined macos:
+    "libluajit(|-5.1).dylib"
+  else:
+    "libluajit(|-5.1).so(|.2)"
 
 type
   LuaState* {.incompleteStruct.} = ptr object
