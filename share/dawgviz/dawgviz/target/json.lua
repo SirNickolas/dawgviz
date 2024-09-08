@@ -3,17 +3,19 @@ local buffer = require "string.buffer"
 local ipairs = ipairs
 local escape = string.escape_json
 
-prologue      = "[{"
+prologue      = "{%s:%s,%s:[{"
+input_key     = "i"
+dawg_key      = "a"
 substring_key = "s"
 first_pos_key = "p"
 len_key       = "n"
 clone_key     = "c"
 link_key      = "l"
 next_key      = "d"
-epilogue      = "}]"
+epilogue      = "}]}"
 
 function emit_prologue()
-  print(prologue)
+  print(prologue:format(escape(input_key), escape(input), escape(dawg_key)))
 end
 
 o = buffer.new()
