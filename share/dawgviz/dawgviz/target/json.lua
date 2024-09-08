@@ -18,11 +18,13 @@ function emit_prologue()
   print(prologue:format(escape(input_key), escape(input), escape(dawg_key)))
 end
 
-o = buffer.new()
+function Node:get_id() return self.id end
+function Node:get_first_pos() return self.first_pos - 1 end
+function Node:should_emit_first_pos() return true end
+function Node:should_emit_clone() return self.clone end
+function Node:should_emit_link() return self.link ~= nil end
 
-function Node:get_id()
-  return self.id
-end
+o = buffer.new()
 
 function Node:emit_substring()
   if substring_key then
@@ -34,17 +36,19 @@ function Node:emit_substring()
 end
 
 function Node:emit_first_pos()
-  o:putf(",\n%s:%d", escape(first_pos_key), self.first_pos - 1)
+  if self:should_emit_first_pos() then
+    o:putf(",\n%s:%d", escape(first_pos_key), self:get_first_pos())
+  end
 end
 
 function Node:emit_clone()
-  if self.clone then
+  if self:should_emit_clone() then
     o:putf(",\n%s:true", escape(clone_key))
   end
 end
 
 function Node:emit_link()
-  if self.link then
+  if self:should_emit_link() then
     o:putf(",\n%s:%s", escape(link_key), self.link:get_id())
   end
 end
