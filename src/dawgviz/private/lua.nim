@@ -1,4 +1,4 @@
-const luaJitLib {.strDefine.} = "libluajit(|-5.1).so(|.2|.1|.0)"
+const luaJitLib {.strDefine.} = "libluajit(|-5.1).so(|.2)"
 
 type
   LuaState* {.incompleteStruct.} = ptr object
