@@ -3,6 +3,8 @@ local buffer = require "string.buffer"
 local ipairs = ipairs
 local escape = string.escape_json
 
+-- luacheck: globals input
+
 prologue      = "{%s:%s,%s:[{"
 input_key     = "i"
 dawg_key      = "g"

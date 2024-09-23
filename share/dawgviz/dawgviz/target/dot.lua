@@ -1,10 +1,9 @@
 local buffer = require "string.buffer"
 
 local pairs = pairs
-local tostring = tostring
 local format = string.format
-local concat = table.concat
 
+-- luacheck: globals input
 local tmp = buffer.new()
 
 function concat_attrs(attrs)
